@@ -8,16 +8,15 @@
 
 int main(int argc, const char *argv[]) {
     int running = TRUE;
-
     int pos_x = 0, pos_y = 0;
     int vel_x = 1, vel_y = 1;
     int tail_x = -1, tail_y = -1;
+    int screen_width, screen_height;
+    char c;
 
-    int screen_width = 200, screen_height = 81;
-
-    initscr();				// to initialize the window
-    noecho();					// do not echo keypresses
-    curs_set(FALSE);	// do not display a cursor
+    initscr();
+    noecho();
+    curs_set(FALSE);
 
     while(running == TRUE) {
         getmaxyx(stdscr, screen_height, screen_width);
@@ -62,6 +61,11 @@ int main(int argc, const char *argv[]) {
 
         refresh();
         usleep(DELAY);
+
+        // Exit with q
+        timeout(1);
+        if ((c = getch()) == 'q')
+            running = FALSE;
 
     }
 
