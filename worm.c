@@ -1,6 +1,3 @@
-// this is a comment !
-// demo.c
-
 #include <ncurses.h>
 #include <unistd.h>
 
@@ -9,10 +6,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define BOTTOM_SIDE 200
-#define RIGHT_SIDE 200
-
-int main(int argc, char *argv[]) { 
+int main(int argc, const char *argv[]) {
     int running = TRUE;
 
     int pos_x = 0, pos_y = 0;
