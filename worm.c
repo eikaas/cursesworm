@@ -43,7 +43,7 @@ int main(int argc, const char *argv[]) {
         mvprintw(pos_y + (tail_y * 2), pos_x + (tail_x * 2), " o ");
         mvprintw(pos_y + tail_y, pos_x + tail_x, " O ");
         // Draw Head
-        mvprintw(pos_y, pos_x, "(:)");
+        mvprintw(pos_y, pos_x, "o_o");
 
         // if x position is on either left or right side of the screen, flip vel_x
         if (pos_x < 0 || pos_x > screen_width) {
