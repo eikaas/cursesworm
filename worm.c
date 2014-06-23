@@ -144,6 +144,10 @@ int main(int argc, const char *argv[]) {
     initscr();
     noecho();
     curs_set(FALSE);
+    start_color();
+
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
     getmaxyx(stdscr, screen_height, screen_width);
 
@@ -170,6 +174,7 @@ int main(int argc, const char *argv[]) {
 
         // Draw all worms
         currentWorm = headWorm;
+        attron(COLOR_PAIR(2));
         while (currentWorm != NULL) {
             updateWorm(currentWorm, screen_height, screen_width);
             drawWorm(currentWorm);
@@ -179,6 +184,7 @@ int main(int argc, const char *argv[]) {
 
         // Draw all apples
         currentApple = headApple;
+        attron(COLOR_PAIR(1));
         while (currentApple != NULL) {
             drawApple(currentApple);
 
