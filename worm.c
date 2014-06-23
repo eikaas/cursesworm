@@ -5,7 +5,7 @@
 #include <time.h>
 
 #define DELAY 40000
-#define NUM_WORMS 500
+#define NUM_WORMS 40
 
 #define TRUE 1
 #define FALSE 0
