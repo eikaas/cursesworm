@@ -5,7 +5,8 @@
 #include <time.h>
 
 #define DELAY 40000
-#define NUM_WORMS 40
+#define NUM_WORMS 5
+#define NUM_APPLES 40
 
 #define TRUE 1
 #define FALSE 0
@@ -20,6 +21,13 @@ typedef struct worm {
     struct worm *next;
 } *Worm;
 
+typedef struct apple {
+    int pos_x;
+    int pos_y;
+
+    struct apple *next;
+} *Apple;
+
 // Create a new worm
 Worm newWorm(int pos_x, int pos_y);
 
@@ -28,11 +36,48 @@ Worm nextWorm(Worm currentWorm);
 
 // Update the worm
 void updateWorm(Worm currentWorm, int screen_height, int screen_width);
+
 // Draw the worm
-void drawWorm(Worm currentWorm, int screen_height, int screen_width);
+void drawWorm(Worm currentWorm);
+
+// Create a new apple
+Apple newApple();
+
+// Delete an apple
+void deleteApple(Apple currentApple);
+
+// Next apple in the list
+Apple nextApple(Apple currentApple);
+
+// Draw the apple
+void drawApple(Apple currentApple);
 
 // Return a random number
 int getRandomInt(int from, int to);
+
+
+Apple newApple(int pos_x, int pos_y) {
+    Apple tmpApple = malloc(sizeof(struct apple));
+    tmpApple->pos_x = pos_x;
+    tmpApple->pos_y = pos_y;
+
+    tmpApple->next = NULL;
+
+    return tmpApple;
+}
+
+void deleteApple(Apple currentApple) {
+    free(currentApple);
+    currentApple = NULL;
+}
+
+Apple nextApple(Apple currentApple) {
+    return currentApple->next;
+}
+
+void drawApple(Apple currentApple) {
+    mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
+}
 
 Worm newWorm(int pos_x, int pos_y) {
     Worm tmpWorm = malloc(sizeof(struct worm));
@@ -70,7 +115,7 @@ void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
     currentWorm->pos_y += currentWorm->vel_y;
 }
 
-void drawWorm(Worm currentWorm, int screen_height, int screen_width) {
+void drawWorm(Worm currentWorm) {
     // Draw Head
     mvprintw(currentWorm->pos_y, currentWorm->pos_x, "o_o");
 
@@ -95,34 +140,49 @@ int main(int argc, const char *argv[]) {
     char c;
     int i;
 
+    // Initialize ncurses
     initscr();
     noecho();
     curs_set(FALSE);
 
     getmaxyx(stdscr, screen_height, screen_width);
 
+    // Create worms
     Worm headWorm = newWorm(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
-
     Worm currentWorm = headWorm;
-
-    // Create more worms
     for (i = 0; i < NUM_WORMS; i++) {
         currentWorm->next = newWorm(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
         currentWorm = currentWorm->next;
     }
 
+    // Create apples
+    Apple headApple = newApple(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
+    Apple currentApple = headApple;
+    for (i = 0; i < NUM_APPLES; i++) {
+        currentApple->next = newApple(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
+        currentApple = currentApple->next;
+    }
 
         while (running == TRUE) {
         getmaxyx(stdscr, screen_height, screen_width);
 
         clear();
 
+        // Draw all worms
         currentWorm = headWorm;
         while (currentWorm != NULL) {
             updateWorm(currentWorm, screen_height, screen_width);
-            drawWorm(currentWorm, screen_height, screen_width);
+            drawWorm(currentWorm);
 
             currentWorm = currentWorm->next;
+        }
+
+        // Draw all apples
+        currentApple = headApple;
+        while (currentApple != NULL) {
+            drawApple(currentApple);
+
+            currentApple = currentApple->next;
         }
 
         refresh();
