@@ -6,6 +6,41 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef struct worm {
+    int pos_x;
+    int pos_y;
+
+    int vel_x;
+    int vel_y;
+
+    int tail_x;
+    int tail_y;
+    struct worm *next;
+} *Worm;
+
+Worm newWorm(int pos_x, int pos_y);
+Worm nextWorm(Worm currentWorm);
+
+Worm newWorm(int pox_x, int pos_y) {
+    Worm tmpWorm = malloc(sizeof(struct worm));
+
+    if (tmpWorm) {
+        tmpWorm->pos_x = pos_x;
+        tmpWorm->pos_y = pos_y;
+        tmpWorm->vel_x = 1;
+        tmpWorm->vel_y = 1;
+        tmpWorm->tail_x = -1;
+        tmpWorm->tail_y = -1;
+        tmpWorm->next = NULL;
+    }
+
+    return tmpWorm;
+}
+
+Worm nextWorm(Worm currentWorm) {
+    return currentWorm->next;
+}
+
 int main(int argc, const char *argv[]) {
     int running = TRUE;
     int pos_x = 0, pos_y = 0;
