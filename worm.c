@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #define DELAY 40000
-#define NUM_WORMS 40
+#define NUM_WORMS 200
 
 #define TRUE 1
 #define FALSE 0
@@ -30,14 +31,18 @@ void updateWorm(Worm currentWorm, int screen_height, int screen_width);
 // Draw the worm
 void drawWorm(Worm currentWorm, int screen_height, int screen_width);
 
+// Return a random number
+int getRandomInt(int from, int to);
+
 Worm newWorm(int pos_x, int pos_y) {
     Worm tmpWorm = malloc(sizeof(struct worm));
 
     if (tmpWorm) {
         tmpWorm->pos_x = pos_x;
         tmpWorm->pos_y = pos_y;
-        tmpWorm->vel_x = 1;
-        tmpWorm->vel_y = 1;
+
+        tmpWorm->vel_x = getRandomInt(0, 1) ? 1 : -1;
+        tmpWorm->vel_y = getRandomInt(0, 1) ? 1 : -1;
 
         tmpWorm->next = NULL;
     }
@@ -76,28 +81,38 @@ void drawWorm(Worm currentWorm, int screen_height, int screen_width) {
     mvprintw(currentWorm->pos_y + (currentWorm->vel_y * -1), currentWorm->pos_x + (currentWorm->vel_x * -1), " O ");
 }
 
+int getRandomInt(int from, int to) {
+    struct timespec seed;
+    clock_gettime(CLOCK_MONOTONIC, &seed);
+    srand(seed.tv_nsec);
+
+    return from + rand() % (to - from + 1);
+}
+
 int main(int argc, const char *argv[]) {
     int running = TRUE;
     int screen_height, screen_width;
     char c;
     int i;
 
-    Worm headWorm = newWorm(10, 10);
+    initscr();
+    noecho();
+    curs_set(FALSE);
+
+    getmaxyx(stdscr, screen_height, screen_width);
+
+    Worm headWorm = newWorm(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
 
     Worm currentWorm = headWorm;
 
     // Create more worms
     for (i = 0; i < NUM_WORMS; i++) {
-        currentWorm->next = newWorm(10 * i, 10 * i);
+        currentWorm->next = newWorm(getRandomInt(0, screen_width), getRandomInt(0, screen_height));
         currentWorm = currentWorm->next;
     }
 
 
-    initscr();
-    noecho();
-    curs_set(FALSE);
-
-    while (running == TRUE) {
+        while (running == TRUE) {
         getmaxyx(stdscr, screen_height, screen_width);
 
         clear();
