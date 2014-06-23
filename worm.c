@@ -5,7 +5,7 @@
 #include <time.h>
 
 #define DELAY 40000
-#define NUM_WORMS 200
+#define NUM_WORMS 500
 
 #define TRUE 1
 #define FALSE 0
@@ -41,8 +41,8 @@ Worm newWorm(int pos_x, int pos_y) {
         tmpWorm->pos_x = pos_x;
         tmpWorm->pos_y = pos_y;
 
-        tmpWorm->vel_x = getRandomInt(0, 1) ? 1 : -1;
-        tmpWorm->vel_y = getRandomInt(0, 1) ? 1 : -1;
+        tmpWorm->vel_x = getRandomInt(FALSE, TRUE) ? 1 : -1;
+        tmpWorm->vel_y = getRandomInt(FALSE, TRUE) ? 1 : -1;
 
         tmpWorm->next = NULL;
     }
