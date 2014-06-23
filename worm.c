@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #define DELAY 40000
-#define NUM_WORMS 10
+#define NUM_WORMS 40
 
 #define TRUE 1
 #define FALSE 0
