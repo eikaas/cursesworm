@@ -1,10 +1,16 @@
 #include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #define DELAY 50000
+#define NUM_WORMS 10
 
 #define TRUE 1
 #define FALSE 0
+
+
+int debug = FALSE;
 
 typedef struct worm {
     int pos_x;
@@ -18,10 +24,18 @@ typedef struct worm {
     struct worm *next;
 } *Worm;
 
+// Create a new worm
 Worm newWorm(int pos_x, int pos_y);
+
+// Get the next worm in the list
 Worm nextWorm(Worm currentWorm);
 
-Worm newWorm(int pox_x, int pos_y) {
+// Update the worm
+void updateWorm(Worm currentWorm, int screen_height, int screen_width);
+// Draw the worm
+void drawWorm(Worm currentWorm, int screen_height, int screen_width);
+
+Worm newWorm(int pos_x, int pos_y) {
     Worm tmpWorm = malloc(sizeof(struct worm));
 
     if (tmpWorm) {
@@ -29,8 +43,11 @@ Worm newWorm(int pox_x, int pos_y) {
         tmpWorm->pos_y = pos_y;
         tmpWorm->vel_x = 1;
         tmpWorm->vel_y = 1;
+
+        // TODO: These vars can be replaced with (vel_{x,y} * -1)
         tmpWorm->tail_x = -1;
         tmpWorm->tail_y = -1;
+
         tmpWorm->next = NULL;
     }
 
@@ -41,6 +58,75 @@ Worm nextWorm(Worm currentWorm) {
     return currentWorm->next;
 }
 
+void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
+
+}
+
+void drawWorm(Worm currentWorm, int screen_height, int screen_width) {
+    // Draw Head
+    mvprintw(currentWorm->pos_y, currentWorm->pos_x, "o_o");
+
+    // Draw Tail
+    mvprintw(currentWorm->pos_y + (currentWorm->tail_y * 4), currentWorm->pos_x + (currentWorm->tail_x * 4), " , ");
+    mvprintw(currentWorm->pos_y + (currentWorm->tail_y * 3), currentWorm->pos_x + (currentWorm->tail_x * 3), " . ");
+    mvprintw(currentWorm->pos_y + (currentWorm->tail_y * 2), currentWorm->pos_x + (currentWorm->tail_x * 2), " o ");
+    mvprintw(currentWorm->pos_y + currentWorm->tail_y, currentWorm->pos_x + currentWorm->tail_x, " O ");
+}
+
+int main(int argc, const char *argv[]) {
+    int running = TRUE;
+    int screen_height, screen_width;
+    int i;
+
+    Worm headWorm = newWorm(10, 10);
+
+    Worm currentWorm = headWorm;
+
+    // Create more worms
+    for (i = 0; i < NUM_WORMS; i++) {
+        currentWorm->next = newWorm(10 * i, 10 * i);
+        currentWorm = currentWorm->next;
+    }
+
+
+    initscr();
+    noecho();
+    curs_set(FALSE);
+
+    while (running == TRUE) {
+        getmaxyx(stdscr, screen_height, screen_width);
+
+        clear();
+
+        currentWorm = headWorm;
+        while (currentWorm != NULL) {
+            if (debug) {
+                printf("px: %d, py: %d, vx: %d, vy: %d, tx: %d, ty: %d\n", 
+                        currentWorm->pos_x,
+                        currentWorm->pos_y,
+                        currentWorm->vel_x,
+                        currentWorm->vel_y,
+                        currentWorm->tail_x,
+                        currentWorm->tail_y);
+            }
+
+            updateWorm(currentWorm, screen_height, screen_width);
+            drawWorm(currentWorm, screen_height, screen_width);
+
+            currentWorm = currentWorm->next;
+        }
+
+        refresh();
+        usleep(DELAY);
+
+    }
+
+    endwin();
+
+    return EXIT_SUCCESS;
+}
+
+/*
 int main(int argc, const char *argv[]) {
     int running = TRUE;
     int pos_x = 0, pos_y = 0;
@@ -107,4 +193,4 @@ int main(int argc, const char *argv[]) {
     endwin();
 
 }
-
+*/
