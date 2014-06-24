@@ -48,9 +48,6 @@ void drawWorm(Worm currentWorm);
 // Create a new apple
 Apple newApple();
 
-// Sets an apple free and returns the next
-Apple deleteApple(Apple currentApple);
-
 // Next apple in the list
 Apple nextApple(Apple currentApple);
 
@@ -71,14 +68,6 @@ Apple newApple(int pos_x, int pos_y) {
     tmpApple->next = NULL;
 
     return tmpApple;
-}
-
-Apple deleteApple(Apple currentApple) {
-    Apple applePtr = currentApple->next;
-    currentApple->prev->next = currentApple->next;
-    free(currentApple);
-    currentApple = NULL;
-    return applePtr;
 }
 
 Apple nextApple(Apple currentApple) {
@@ -226,7 +215,6 @@ int main(int argc, const char *argv[]) {
             while (currentApple != NULL) {
                 if (checkCollision(currentWorm, currentApple)) {
                     currentApple->visible = FALSE;
-                    currentApple = deleteApple(currentApple);
                     currentWorm->length++;
 
                 }
