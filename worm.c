@@ -5,8 +5,8 @@
 #include <time.h>
 
 #define DELAY 40000
-#define NUM_WORMS 5
-#define NUM_APPLES 40
+#define NUM_WORMS 20
+#define NUM_APPLES 10
 
 #define TRUE 1
 #define FALSE 0
@@ -30,6 +30,7 @@ typedef struct apple {
     int visible;
 
     struct apple *next;
+    struct apple *prev;
 } *Apple;
 
 // Create a new worm
@@ -47,8 +48,8 @@ void drawWorm(Worm currentWorm);
 // Create a new apple
 Apple newApple();
 
-// Delete an apple
-void deleteApple(Apple currentApple);
+// Sets an apple free and returns the next
+Apple deleteApple(Apple currentApple);
 
 // Next apple in the list
 Apple nextApple(Apple currentApple);
@@ -72,9 +73,12 @@ Apple newApple(int pos_x, int pos_y) {
     return tmpApple;
 }
 
-void deleteApple(Apple currentApple) {
+Apple deleteApple(Apple currentApple) {
+    Apple applePtr = currentApple->next;
+    currentApple->prev->next = currentApple->next;
     free(currentApple);
     currentApple = NULL;
+    return applePtr;
 }
 
 Apple nextApple(Apple currentApple) {
@@ -82,7 +86,9 @@ Apple nextApple(Apple currentApple) {
 }
 
 void drawApple(Apple currentApple) {
-    mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
+    if (currentApple->visible) {
+        mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
+    }
 }
 
 Worm newWorm(int pos_x, int pos_y) {
@@ -95,7 +101,7 @@ Worm newWorm(int pos_x, int pos_y) {
         tmpWorm->vel_x = getRandomInt(FALSE, TRUE) ? 1 : -1;
         tmpWorm->vel_y = getRandomInt(FALSE, TRUE) ? 1 : -1;
 
-        tmpWorm->length = 1;
+        tmpWorm->length = 0;
 
         tmpWorm->next = NULL;
     }
@@ -130,6 +136,8 @@ void drawWorm(Worm currentWorm) {
 
     // Draw body
     for (i = 1; i < currentWorm->length + 1; i++) {
+        if (offset_y == 0)
+            offset_y = 1;
         offset_y = currentWorm->vel_y * i * -1;
         offset_x = currentWorm->vel_x * i * -1;
         mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " O ");
@@ -218,6 +226,7 @@ int main(int argc, const char *argv[]) {
             while (currentApple != NULL) {
                 if (checkCollision(currentWorm, currentApple)) {
                     currentApple->visible = FALSE;
+                    currentApple = deleteApple(currentApple);
                     currentWorm->length++;
 
                 }
