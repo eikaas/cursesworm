@@ -18,12 +18,16 @@ typedef struct worm {
     int vel_x;
     int vel_y;
 
+    int length;
+
     struct worm *next;
 } *Worm;
 
 typedef struct apple {
     int pos_x;
     int pos_y;
+
+    int visible;
 
     struct apple *next;
 } *Apple;
@@ -61,6 +65,8 @@ Apple newApple(int pos_x, int pos_y) {
     tmpApple->pos_x = pos_x;
     tmpApple->pos_y = pos_y;
 
+    tmpApple->visible = TRUE;
+
     tmpApple->next = NULL;
 
     return tmpApple;
@@ -89,6 +95,8 @@ Worm newWorm(int pos_x, int pos_y) {
         tmpWorm->vel_x = getRandomInt(FALSE, TRUE) ? 1 : -1;
         tmpWorm->vel_y = getRandomInt(FALSE, TRUE) ? 1 : -1;
 
+        tmpWorm->length = 1;
+
         tmpWorm->next = NULL;
     }
 
@@ -116,14 +124,25 @@ void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
 }
 
 void drawWorm(Worm currentWorm) {
-    // Draw Head
+    int i, offset_y, offset_x;
+    // Draw head
     mvprintw(currentWorm->pos_y, currentWorm->pos_x, "o_o");
 
-    // Draw Tail
-    mvprintw(currentWorm->pos_y + (currentWorm->vel_y * -1 * 4), currentWorm->pos_x + (currentWorm->vel_x * -1 * 4), " , ");
-    mvprintw(currentWorm->pos_y + (currentWorm->vel_y * -1 * 3), currentWorm->pos_x + (currentWorm->vel_x * -1 * 3), " . ");
-    mvprintw(currentWorm->pos_y + (currentWorm->vel_y * -1 * 2), currentWorm->pos_x + (currentWorm->vel_x * -1 * 2), " o ");
-    mvprintw(currentWorm->pos_y + (currentWorm->vel_y * -1), currentWorm->pos_x + (currentWorm->vel_x * -1), " O ");
+    // Draw body
+    for (i = 1; i < currentWorm->length + 1; i++) {
+        offset_y = currentWorm->vel_y * i * -1;
+        offset_x = currentWorm->vel_x * i * -1;
+        mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " O ");
+    }
+
+    // Draw tail.
+    // Need to determine if we need to increment or decrement the offset. Is there a better way to do this?
+    offset_y = offset_y > 0 ? offset_y + 1 : offset_y - 1;
+    offset_x = offset_x > 0 ? offset_x + 1 : offset_x - 1;
+    mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " o ");
+    offset_y = offset_y > 0 ? offset_y + 1 : offset_y - 1;
+    offset_x = offset_x > 0 ? offset_x + 1 : offset_x - 1;
+    mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " . ");
 }
 
 int getRandomInt(int from, int to) {
@@ -132,6 +151,22 @@ int getRandomInt(int from, int to) {
     srand(seed.tv_nsec);
 
     return from + rand() % (to - from + 1);
+}
+
+int checkCollision(Worm worm, Apple apple) {
+    int retval = FALSE;
+
+    // Doesnt work
+    int deltaX = abs(worm->pos_x - apple->pos_x);
+    int deltaY = abs(worm->pos_y - apple->pos_y);
+
+    if ((deltaX <= 2 && deltaY <= 2) && apple->visible == TRUE) {
+        retval = TRUE;
+    } else {
+        retval = FALSE;
+    }
+
+    return retval;
 }
 
 int main(int argc, const char *argv[]) {
@@ -178,6 +213,16 @@ int main(int argc, const char *argv[]) {
         while (currentWorm != NULL) {
             updateWorm(currentWorm, screen_height, screen_width);
             drawWorm(currentWorm);
+
+            currentApple = headApple;
+            while (currentApple != NULL) {
+                if (checkCollision(currentWorm, currentApple)) {
+                    currentApple->visible = FALSE;
+                    currentWorm->length++;
+
+                }
+                currentApple = currentApple->next;
+            }
 
             currentWorm = currentWorm->next;
         }
