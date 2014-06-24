@@ -6,7 +6,7 @@
 
 #define DELAY 40000
 #define NUM_WORMS 20
-#define NUM_APPLES 10
+#define NUM_APPLES 40
 
 #define TRUE 1
 #define FALSE 0
@@ -26,8 +26,6 @@ typedef struct worm {
 typedef struct apple {
     int pos_x;
     int pos_y;
-
-    int visible;
 
     struct apple *next;
     struct apple *prev;
@@ -57,13 +55,10 @@ void drawApple(Apple currentApple);
 // Return a random number
 int getRandomInt(int from, int to);
 
-
 Apple newApple(int pos_x, int pos_y) {
     Apple tmpApple = malloc(sizeof(struct apple));
     tmpApple->pos_x = pos_x;
     tmpApple->pos_y = pos_y;
-
-    tmpApple->visible = TRUE;
 
     tmpApple->next = NULL;
 
@@ -75,9 +70,7 @@ Apple nextApple(Apple currentApple) {
 }
 
 void drawApple(Apple currentApple) {
-    if (currentApple->visible) {
-        mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
-    }
+    mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
 }
 
 Worm newWorm(int pos_x, int pos_y) {
@@ -125,8 +118,6 @@ void drawWorm(Worm currentWorm) {
 
     // Draw body
     for (i = 1; i < currentWorm->length + 1; i++) {
-        if (offset_y == 0)
-            offset_y = 1;
         offset_y = currentWorm->vel_y * i * -1;
         offset_x = currentWorm->vel_x * i * -1;
         mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " O ");
@@ -157,7 +148,7 @@ int checkCollision(Worm worm, Apple apple) {
     int deltaX = abs(worm->pos_x - apple->pos_x);
     int deltaY = abs(worm->pos_y - apple->pos_y);
 
-    if ((deltaX <= 2 && deltaY <= 2) && apple->visible == TRUE) {
+    if (deltaX <= 2 && deltaY <= 1) {
         retval = TRUE;
     } else {
         retval = FALSE;
@@ -214,7 +205,8 @@ int main(int argc, const char *argv[]) {
             currentApple = headApple;
             while (currentApple != NULL) {
                 if (checkCollision(currentWorm, currentApple)) {
-                    currentApple->visible = FALSE;
+                    currentApple->pos_x = getRandomInt(0, screen_width);
+                    currentApple->pos_y = getRandomInt(0, screen_height);
                     currentWorm->length++;
 
                 }
