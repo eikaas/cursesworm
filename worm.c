@@ -47,14 +47,18 @@ void drawWorm(Worm currentWorm);
 // Create a new apple
 Apple newApple();
 
-// Next apple in the list
-Apple nextApple(Apple currentApple);
-
 // Draw the apple
 void drawApple(Apple currentApple);
 
 // Return a random number
 int getRandomInt(int from, int to);
+
+// Logic
+void logic(Worm headWorm, Apple headApple, int screen_height, int screen_width);
+// Update
+void update(Worm headWorm, Apple headApple, int screen_height, int screen_width);
+// Render
+void render(Worm headWorm, Apple headApple);
 
 Apple newApple(int pos_x, int pos_y) {
     Apple tmpApple = malloc(sizeof(struct apple));
@@ -64,10 +68,6 @@ Apple newApple(int pos_x, int pos_y) {
     tmpApple->next = NULL;
 
     return tmpApple;
-}
-
-Apple nextApple(Apple currentApple) {
-    return currentApple->next;
 }
 
 void drawApple(Apple currentApple) {
@@ -230,59 +230,91 @@ int main(int argc, const char *argv[]) {
         currentApple = currentApple->next;
     }
 
-        while (running == TRUE) {
+    // Mail Loop
+    while (running == TRUE) {
         getmaxyx(stdscr, screen_height, screen_width);
 
-        clear();
+        logic(headWorm, headApple, screen_height, screen_width);
+        update(headWorm, headApple, screen_height, screen_width);
+        render(headWorm, headApple);
 
-        // Draw all worms
-        currentWorm = headWorm;
-        attron(COLOR_PAIR(2));
-        while (currentWorm != NULL) {
-            updateWorm(currentWorm, screen_height, screen_width);
-
-            /*
-             * Post-Bug note: Dont forget to make a copy when traversing a list!
-             * after drawing drawWorm(), currentWorm->body was a null pointer, resulting in the
-             * following assertion to faile. (Well, after segfaulting in checkCollision()).
-             */
-            drawWorm(currentWorm);
-            assert(currentWorm->body != NULL);
-
-            currentApple = headApple;
-
-            while (currentApple != NULL) {
-                if (checkCollision(currentWorm, currentApple)) {
-                    currentApple->pos_x = getRandomInt(0, screen_width);
-                    currentApple->pos_y = getRandomInt(0, screen_height);
-
-                }
-                currentApple = currentApple->next;
-            }
-
-            currentWorm = currentWorm->next;
-        }
-
-        // Draw all apples
-        currentApple = headApple;
-        attron(COLOR_PAIR(1));
-        while (currentApple != NULL) {
-            drawApple(currentApple);
-
-            currentApple = currentApple->next;
-        }
-
-        refresh();
-        usleep(DELAY);
-
+        // Quit if q is pressed
         timeout(1);
         if ((c = getch()) == 'q')
             running = FALSE;
-
     }
 
     endwin();
 
     return EXIT_SUCCESS;
+}
+
+void logic(Worm headWorm, Apple headApple, int screen_height, int screen_width) {
+    Worm currentWorm = headWorm;
+    Apple currentApple = headApple;
+
+    // For every worm
+    while (currentWorm != NULL) {
+        // Check for collision with apples
+        while (currentApple != NULL) {
+            // If we have a collision
+            if (checkCollision(currentWorm, currentApple)) {
+                // Move the apple
+                currentApple->pos_x = getRandomInt(0, screen_width);
+                currentApple->pos_y = getRandomInt(0, screen_height);
+                // Grow the worm
+                growWorm(currentWorm);
+            }
+            // Next apple
+            currentApple = currentApple->next;
+        }
+        // Next worm
+        currentWorm = currentWorm->next;
+        // Reset applepointer
+        currentApple = headApple;
+    }
+
+}
+
+void update(Worm headWorm, Apple headApple, int screen_height, int screen_width) {
+    Worm currentWorm = headWorm;
+
+    // For every worm
+    while (currentWorm != NULL) {
+        updateWorm(currentWorm, screen_height, screen_width);
+        currentWorm = currentWorm->next;
+    }
+}
+
+void render(Worm headWorm, Apple headApple) {
+    Worm currentWorm = headWorm;
+    Apple currentApple = headApple;
+
+    // Clear the screen
+    clear();
+
+    // Initialize color
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+
+    // Set Worm color
+    attron(COLOR_PAIR(2));
+    // Render every worm
+    while (currentWorm != NULL) {
+        drawWorm(currentWorm);
+        currentWorm = currentWorm->next;
+    }
+
+    // Set Apple color
+    attron(COLOR_PAIR(1)); 
+    // Render all apples
+    while (currentApple != NULL) {
+        drawApple(currentApple);
+        currentApple = currentApple->next;
+    }
+
+    refresh();
+    usleep(DELAY);
 }
 
