@@ -152,6 +152,7 @@ void drawWorm(Worm currentWorm) {
         tmpBody = tmpBody->next;
     } while (tmpBody != NULL);
 
+    // TODO: update this
     // Draw body
     /*
     for (i = 1; i < currentWorm->length + 1; i++) {
@@ -199,18 +200,13 @@ int checkCollision(Worm worm, Apple apple) {
 
 int main(int argc, const char *argv[]) {
     int running = TRUE;
-    int screen_height, screen_width;
+    int screen_height, screen_width, i;
     char c;
-    int i;
 
     // Initialize ncurses
     initscr();
     noecho();
     curs_set(FALSE);
-    start_color();
-
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
     getmaxyx(stdscr, screen_height, screen_width);
 
