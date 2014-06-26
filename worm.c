@@ -74,23 +74,44 @@ void drawApple(Apple currentApple) {
     mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
 }
 
-// INCOMPLETE, doesnt grow!
 void growWorm(Worm currentWorm) {
-    int bodyCount = 0;
+    // Allways store a pointer to the previous body part
+    Body prevBodypart = currentWorm->body;
 
     // Get the first body part
     Body currentBodypart = currentWorm->body;
 
     // Traverse the list untill we get to the last body part
     while (currentBodypart != NULL) {
-        bodyCount++;
+        prevBodypart = currentBodypart;
         currentBodypart = currentBodypart->next;
     }
 
     // Insert new bodypart at the end of the worm
     currentBodypart = malloc(sizeof(struct body));
-    currentBodypart->pos_x = currentWorm->body->pos_x;
-    currentBodypart->pos_y = currentWorm->body->pos_y;
+
+    // Need to decrement or increment depending on the velocity of the
+    // previous body part for the next bodypart to end up in the right place.
+
+    // If the previous bodypart is traveling to the right
+    if (prevBodypart->vel_x > 0) {
+        currentBodypart->pos_x = prevBodypart->pos_x - 1;
+    // Else if the previous bodypart is traveling to the left
+    } else {
+        currentBodypart->pos_x = prevBodypart->pos_x + 1;
+    }
+
+    // If the previous bodypart is traveling down
+    if (prevBodypart->vel_y > 0) {
+        currentBodypart->pos_y = prevBodypart->pos_y - 1;
+    // else if the previous bodypart is traveling up
+    } else {
+        currentBodypart->pos_y = prevBodypart->pos_y + 1;
+    }
+
+    // Set the same velocity as the previous body part.
+    currentBodypart->vel_x = prevBodypart->vel_x;
+    currentBodypart->vel_y = prevBodypart->vel_y;
 
     // The velocity should be the same as the parent body part
     // NB: Might run into issues here if we grow the worm near the edge of the screen
@@ -123,6 +144,31 @@ Worm newWorm(int pos_x, int pos_y) {
     return tmpWorm;
 }
 
+// TODO: Needs to check all the links and flip each link when it hits the side.
+void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
+    assert(currentWorm != NULL);
+    assert(currentWorm->body != NULL);
+
+    Body currentBodypart = currentWorm->body;
+    // Traverse the body of the worm.
+    while (currentBodypart != NULL) {
+        // if x position is on either left or right side of the screen, flip vel_x
+        if (currentBodypart->pos_x < 0 || currentBodypart->pos_x > screen_width)
+            currentBodypart->vel_x *= -1;
+
+        // if y position is on either top or bottom side of the screen, flip vel_y
+        if (currentBodypart->pos_y < 0 || currentBodypart->pos_y > screen_height)
+            currentBodypart->vel_y *= -1;
+
+        // Update the position
+        currentBodypart->pos_x += currentBodypart->vel_x;
+        currentBodypart->pos_y += currentBodypart->vel_y;
+
+        currentBodypart = currentBodypart->next;
+    }
+}
+
+/*
 void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
     assert(currentWorm != NULL);
     assert(currentWorm->body != NULL);
@@ -139,22 +185,9 @@ void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
     // Update position
     currentWorm->body->pos_x += currentWorm->body->vel_x;
     currentWorm->body->pos_y += currentWorm->body->vel_y;
-}
 
-void drawWorm(Worm currentWorm) {
-    assert(currentWorm != NULL);
-    assert(currentWorm->body != NULL);
 
-    Body tmpBody = currentWorm->body;
-
-    do {
-        mvprintw(tmpBody->pos_y, tmpBody->pos_x, "O");
-        tmpBody = tmpBody->next;
-    } while (tmpBody != NULL);
-
-    // TODO: update this
-    // Draw body
-    /*
+ // TODO: This should not be done in the draw function. Update to deal with the new link body and only set position. No drawing
     for (i = 1; i < currentWorm->length + 1; i++) {
         offset_y = currentWorm->vel_y * i * -1;
         offset_x = currentWorm->vel_x * i * -1;
@@ -169,7 +202,19 @@ void drawWorm(Worm currentWorm) {
     offset_y = offset_y > 0 ? offset_y + 1 : offset_y - 1;
     offset_x = offset_x > 0 ? offset_x + 1 : offset_x - 1;
     mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " . ");
-    */
+}
+*/
+
+void drawWorm(Worm currentWorm) {
+    assert(currentWorm != NULL);
+    assert(currentWorm->body != NULL);
+
+    Body currentBodypart = currentWorm->body;
+
+    while (currentBodypart != NULL) {
+        mvprintw(currentBodypart->pos_x, currentBodypart->pos_y, "O");
+        currentBodypart = currentBodypart->next;
+    }
 }
 
 int getRandomInt(int from, int to) {
@@ -198,6 +243,7 @@ int checkCollision(Worm worm, Apple apple) {
     return retval;
 }
 
+/* getmaxyx takes args in y,x. There is a bug related to this. make it go away */
 int main(int argc, const char *argv[]) {
     int running = TRUE;
     int screen_height, screen_width, i;
