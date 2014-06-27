@@ -35,11 +35,15 @@ typedef struct apple {
     struct apple *prev;
 } *Apple;
 
+// We need these often
+int screen_height;
+int screen_width;
+
 // Create a new worm
 Worm newWorm(int pos_x, int pos_y);
 
 // Update the worm
-void updateWorm(Worm currentWorm, int screen_height, int screen_width);
+void updateWorm(Worm currentWorm);
 
 // Draw the worm
 void drawWorm(Worm currentWorm);
@@ -54,9 +58,9 @@ void drawApple(Apple currentApple);
 int getRandomInt(int from, int to);
 
 // Logic
-void logic(Worm headWorm, Apple headApple, int screen_height, int screen_width);
+void logic(Worm headWorm, Apple headApple);
 // Update
-void update(Worm headWorm, Apple headApple, int screen_height, int screen_width);
+void update(Worm headWorm, Apple headApple);
 // Render
 void render(Worm headWorm, Apple headApple);
 
@@ -145,7 +149,7 @@ Worm newWorm(int pos_x, int pos_y) {
 }
 
 // TODO: Needs to check all the links and flip each link when it hits the side.
-void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
+void updateWorm(Worm currentWorm) {
     assert(currentWorm != NULL);
     assert(currentWorm->body != NULL);
 
@@ -153,11 +157,11 @@ void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
     // Traverse the body of the worm.
     while (currentBodypart != NULL) {
         // if x position is on either left or right side of the screen, flip vel_x
-        if (currentBodypart->pos_x < 0 || currentBodypart->pos_x > screen_width)
+        if (currentBodypart->pos_x < 0 || currentBodypart->pos_x > screen_height)
             currentBodypart->vel_x *= -1;
 
         // if y position is on either top or bottom side of the screen, flip vel_y
-        if (currentBodypart->pos_y < 0 || currentBodypart->pos_y > screen_height)
+        if (currentBodypart->pos_y < 0 || currentBodypart->pos_y > screen_width)
             currentBodypart->vel_y *= -1;
 
         // Update the position
@@ -226,15 +230,17 @@ int getRandomInt(int from, int to) {
 }
 
 int checkCollision(Worm worm, Apple apple) {
+    int retval = FALSE;
+
     assert(worm != NULL);
     assert(worm->body != NULL);
     assert(apple != NULL);
-    int retval = FALSE;
 
-    int deltaX = abs(worm->body->pos_x - apple->pos_x);
-    int deltaY = abs(worm->body->pos_y - apple->pos_y);
+    // The "head" of the worm is the first body part
+    Body wormHead = worm->body;
 
-    if (deltaX <= 2 && deltaY <= 1) {
+    // If we eat an apple
+    if (wormHead->pos_x == apple->pos_x && wormHead->pos_y == apple->pos_y) {
         retval = TRUE;
     } else {
         retval = FALSE;
@@ -243,10 +249,9 @@ int checkCollision(Worm worm, Apple apple) {
     return retval;
 }
 
-/* getmaxyx takes args in y,x. There is a bug related to this. make it go away */
 int main(int argc, const char *argv[]) {
     int running = TRUE;
-    int screen_height, screen_width, i;
+    int i;
     char c;
 
     // Initialize ncurses
@@ -254,6 +259,7 @@ int main(int argc, const char *argv[]) {
     noecho();
     curs_set(FALSE);
 
+    /* getmaxyx takes args in y,x. There is a bug related to this. make it go away */
     getmaxyx(stdscr, screen_height, screen_width);
 
     // Create worms
@@ -274,10 +280,12 @@ int main(int argc, const char *argv[]) {
 
     // Mail Loop
     while (running == TRUE) {
+        // We need to set the terminal dimensions to screen_height and screen_width for each
+        // iteration of this loop to make resizing possible
         getmaxyx(stdscr, screen_height, screen_width);
 
-        logic(headWorm, headApple, screen_height, screen_width);
-        update(headWorm, headApple, screen_height, screen_width);
+        logic(headWorm, headApple);
+        update(headWorm, headApple);
         render(headWorm, headApple);
 
         // Quit if q is pressed
@@ -291,7 +299,7 @@ int main(int argc, const char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-void logic(Worm headWorm, Apple headApple, int screen_height, int screen_width) {
+void logic(Worm headWorm, Apple headApple) {
     Worm currentWorm = headWorm;
     Apple currentApple = headApple;
 
@@ -318,12 +326,12 @@ void logic(Worm headWorm, Apple headApple, int screen_height, int screen_width) 
 
 }
 
-void update(Worm headWorm, Apple headApple, int screen_height, int screen_width) {
+void update(Worm headWorm, Apple headApple) {
     Worm currentWorm = headWorm;
 
     // For every worm
     while (currentWorm != NULL) {
-        updateWorm(currentWorm, screen_height, screen_width);
+        updateWorm(currentWorm);
         currentWorm = currentWorm->next;
     }
 }
