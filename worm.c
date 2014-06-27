@@ -300,7 +300,7 @@ int main(int argc, const char *argv[]) {
     // Create worms
     Worm headWorm = newWorm(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height));
     Worm currentWorm = headWorm;
-    for (i = 0; i < NUM_WORMS; i++) {
+    for (i = 0; i < NUM_WORMS - 1; i++) {
         currentWorm->next = newWorm(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height));
         currentWorm = currentWorm->next;
     }
