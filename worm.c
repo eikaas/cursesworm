@@ -12,15 +12,6 @@
 #define TRUE 1
 #define FALSE 0
 
-/*
- * Bugs:
- *  * FIXED: screen_height and screen_width gets mixed up somewhere
- *  * FIXED: worms spawning only on one side.
- *  * when resizing, if a worm is outside the screen its lost untill resized back.
- *  * FIXED: Worms dont grow.
- *  * FIXED: Worms travel 1px outside the edge on right and bottom side.
- */
-
 typedef struct control {
     int screen_width;
     int screen_height;
@@ -47,13 +38,9 @@ typedef struct apple {
     int pos_y;
 
     struct apple *next;
-    struct apple *prev;
 } *Apple;
 
-// To be removed
 Control control;
-
-void drawDebug();
 
 // Struct for holding global control vars.
 Control newControl();
@@ -65,7 +52,6 @@ Worm newWorm(int pos_x, int pos_y);
 void updateWorm(Worm currentWorm); 
 // Draw the worm
 void drawWorm(Worm currentWorm);
-
 // Create a new apple
 Apple newApple();
 
@@ -174,7 +160,6 @@ Worm newWorm(int pos_x, int pos_y) {
     return tmpWorm;
 }
 
-// TODO: Needs to check all the links and flip each link when it hits the side.
 void updateWorm(Worm currentWorm) {
     assert(currentWorm != NULL);
     assert(currentWorm->body != NULL);
@@ -196,47 +181,6 @@ void updateWorm(Worm currentWorm) {
 
         currentBodypart = currentBodypart->next;
     }
-}
-
-/*
-void updateWorm(Worm currentWorm, int screen_height, int screen_width) {
-    assert(currentWorm != NULL);
-    assert(currentWorm->body != NULL);
-    // if x position is on either left or right side of the screen, flip vel_x
-    if (currentWorm->body->pos_x < 0 || currentWorm->body->pos_x > screen_width) {
-        currentWorm->body->vel_x *= -1;
-    }
-
-    // if y position is on either top or bottom side of the screen, flip vel_y
-    if (currentWorm->body->pos_y < 0 || currentWorm->body->pos_y > screen_height) {
-        currentWorm->body->vel_y *= -1;
-    }
-
-    // Update position
-    currentWorm->body->pos_x += currentWorm->body->vel_x;
-    currentWorm->body->pos_y += currentWorm->body->vel_y;
-
-
- // TODO: This should not be done in the draw function. Update to deal with the new link body and only set position. No drawing
-    for (i = 1; i < currentWorm->length + 1; i++) {
-        offset_y = currentWorm->vel_y * i * -1;
-        offset_x = currentWorm->vel_x * i * -1;
-        mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " O ");
-    }
-
-    // Draw tail.
-    // Need to determine if we need to increment or decrement the offset. Is there a better way to do this?
-    offset_y = offset_y > 0 ? offset_y + 1 : offset_y - 1;
-    offset_x = offset_x > 0 ? offset_x + 1 : offset_x - 1;
-    mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " o ");
-    offset_y = offset_y > 0 ? offset_y + 1 : offset_y - 1;
-    offset_x = offset_x > 0 ? offset_x + 1 : offset_x - 1;
-    mvprintw(currentWorm->pos_y + offset_y, currentWorm->pos_x + offset_x, " . ");
-}
-*/
-
-void drawDebug() {
-    mvprintw(1, 1, "screen_width: %d, screen_height: %d", control->screen_width, control->screen_height);
 }
 
 void drawWorm(Worm currentWorm) {
@@ -291,7 +235,6 @@ int main(int argc, const char *argv[]) {
     noecho();
     curs_set(FALSE);
 
-    /* getmaxyx takes args in y,x. There is a bug related to this. make it go away */
     getmaxyx(stdscr, control->screen_height, control->screen_width);
 
     // Create worms
@@ -395,8 +338,6 @@ void render(Worm headWorm, Apple headApple) {
         drawWorm(currentWorm);
         currentWorm = currentWorm->next;
     }
-
-    drawDebug();
 
     refresh();
     usleep(DELAY);
