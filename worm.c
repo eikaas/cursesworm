@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <string.h>
 
 #define DELAY 40000
-#define NUM_WORMS 10
-#define NUM_APPLES 300
+#define NUM_WORMS 20
+#define NUM_APPLES 60
 
 #define TRUE 1
 #define FALSE 0
@@ -37,6 +38,8 @@ typedef struct apple {
     int pos_x;
     int pos_y;
 
+    char *string;
+
     struct apple *next;
 } *Apple;
 
@@ -53,7 +56,7 @@ void updateWorm(Worm currentWorm);
 // Draw the worm
 void drawWorm(Worm currentWorm);
 // Create a new apple
-Apple newApple();
+Apple newApple(int pos_x, int pos_y, char *string);
 
 // Draw the apple
 void drawApple(Apple currentApple);
@@ -80,10 +83,13 @@ Control newControl() {
     return tmpControl;
 }
 
-Apple newApple(int pos_x, int pos_y) {
+Apple newApple(int pos_x, int pos_y, char *string) {
     Apple tmpApple = malloc(sizeof(struct apple));
     tmpApple->pos_x = pos_x;
     tmpApple->pos_y = pos_y;
+
+    tmpApple->string = malloc(strlen(string) + 1);
+    strncpy(tmpApple->string, string, strlen(string));
 
     tmpApple->next = NULL;
 
@@ -91,7 +97,7 @@ Apple newApple(int pos_x, int pos_y) {
 }
 
 void drawApple(Apple currentApple) {
-    mvprintw(currentApple->pos_y, currentApple->pos_x, "@");
+    mvprintw(currentApple->pos_y, currentApple->pos_x, currentApple->string);
 }
 
 void growWorm(Worm currentWorm) {
@@ -193,13 +199,13 @@ void drawWorm(Worm currentWorm) {
     while (currentBodypart != NULL) {
         // Head
         if (bodyCount == 0) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "P");
         // Tail
         } else if (currentBodypart->next == NULL) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "Z");
         // Body
         } else {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
         }
         bodyCount++;
         currentBodypart = currentBodypart->next;
@@ -225,7 +231,7 @@ int checkCollision(Worm worm, Apple apple) {
     Body wormHead = worm->body;
 
     // If we eat an apple
-    if (wormHead->pos_x == apple->pos_x && wormHead->pos_y == apple->pos_y) {
+    if ( ((wormHead->pos_x >= apple->pos_x) && (wormHead->pos_x <= (apple->pos_x + strlen(apple->string)))) && (wormHead->pos_y == apple->pos_y)) {
         retval = TRUE;
     } else {
         retval = FALSE;
@@ -235,6 +241,8 @@ int checkCollision(Worm worm, Apple apple) {
 }
 
 int main(int argc, const char *argv[]) {
+    char *appleString = "LSE";
+
     int running = TRUE;
     int i;
     char c;
@@ -257,10 +265,10 @@ int main(int argc, const char *argv[]) {
     }
 
     // Create apples
-    Apple headApple = newApple(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height));
+    Apple headApple = newApple(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height), appleString);
     Apple currentApple = headApple;
     for (i = 0; i < NUM_APPLES; i++) {
-        currentApple->next = newApple(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height));
+        currentApple->next = newApple(getRandomInt(0, control->screen_width), getRandomInt(0, control->screen_height), appleString);
         currentApple = currentApple->next;
     }
 
