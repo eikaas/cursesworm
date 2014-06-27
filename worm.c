@@ -6,8 +6,8 @@
 #include <assert.h>
 
 #define DELAY 40000
-#define NUM_WORMS 1
-#define NUM_APPLES 40
+#define NUM_WORMS 10
+#define NUM_APPLES 300
 
 #define TRUE 1
 #define FALSE 0
@@ -17,7 +17,7 @@
  *  * FIXED: screen_height and screen_width gets mixed up somewhere
  *  * FIXED: worms spawning only on one side.
  *  * when resizing, if a worm is outside the screen its lost untill resized back.
- *  * Worms dont grow.
+ *  * FIXED: Worms dont grow.
  *  * FIXED: Worms travel 1px outside the edge on right and bottom side.
  */
 
@@ -147,12 +147,8 @@ void growWorm(Worm currentWorm) {
     currentBodypart->vel_x = prevBodypart->vel_x;
     currentBodypart->vel_y = prevBodypart->vel_y;
 
-    // The velocity should be the same as the parent body part
-    // NB: Might run into issues here if we grow the worm near the edge of the screen
-    currentBodypart->vel_x = currentWorm->body->vel_y;
-    currentBodypart->vel_y = currentWorm->body->vel_y;
-
     currentBodypart->next = NULL;
+    prevBodypart->next = currentBodypart;
 }
 
 Worm newWorm(int pos_x, int pos_y) {
@@ -384,20 +380,20 @@ void render(Worm headWorm, Apple headApple) {
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
-    // Set Worm color
-    attron(COLOR_PAIR(2));
-    // Render every worm
-    while (currentWorm != NULL) {
-        drawWorm(currentWorm);
-        currentWorm = currentWorm->next;
-    }
-
     // Set Apple color
     attron(COLOR_PAIR(1)); 
     // Render all apples
     while (currentApple != NULL) {
         drawApple(currentApple);
         currentApple = currentApple->next;
+    }
+
+    // Set Worm color
+    attron(COLOR_PAIR(2));
+    // Render every worm
+    while (currentWorm != NULL) {
+        drawWorm(currentWorm);
+        currentWorm = currentWorm->next;
     }
 
     drawDebug();
