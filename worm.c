@@ -14,7 +14,8 @@
 
 /*
  * Bugs:
- *  * FIXED: screen_height and screen_width gets mixed up somewhere *      - worms spawning only on one side. 
+ *  * FIXED: screen_height and screen_width gets mixed up somewhere
+ *  * FIXED: worms spawning only on one side.
  *  * when resizing, if a worm is outside the screen its lost untill resized back.
  *  * Worms dont grow.
  *  * FIXED: Worms travel 1px outside the edge on right and bottom side.
