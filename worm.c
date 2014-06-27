@@ -184,13 +184,24 @@ void updateWorm(Worm currentWorm) {
 }
 
 void drawWorm(Worm currentWorm) {
+    int bodyCount = 0;
     assert(currentWorm != NULL);
     assert(currentWorm->body != NULL);
 
     Body currentBodypart = currentWorm->body;
 
     while (currentBodypart != NULL) {
-        mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
+        // Head
+        if (bodyCount == 0) {
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+        // Tail
+        } else if (currentBodypart->next == NULL) {
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+        // Body
+        } else {
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
+        }
+        bodyCount++;
         currentBodypart = currentBodypart->next;
     }
 }
