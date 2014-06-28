@@ -1,3 +1,3 @@
-Silly (n)cursed worm
+Silly (n)cursed worms
 
-$ gcc worm.c -lncurses
+$ gcc worm.c -lncurses -lrt
