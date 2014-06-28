@@ -199,13 +199,13 @@ void drawWorm(Worm currentWorm) {
     while (currentBodypart != NULL) {
         // Head
         if (bodyCount == 0) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "P");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
         // Tail
         } else if (currentBodypart->next == NULL) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "Z");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "o");
         // Body
         } else {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
         }
         bodyCount++;
         currentBodypart = currentBodypart->next;
@@ -241,7 +241,7 @@ int checkCollision(Worm worm, Apple apple) {
 }
 
 int main(int argc, const char *argv[]) {
-    char *appleString = "LSE";
+    char *appleString = "@";
 
     int running = TRUE;
     int i;
