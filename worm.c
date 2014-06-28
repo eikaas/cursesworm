@@ -156,9 +156,9 @@ Worm newWorm(int pos_x, int pos_y) {
     tmpWorm->body->pos_x = pos_x;
     tmpWorm->body->pos_y = pos_y;
 
-    // Set a random initial velocty
-    tmpWorm->body->vel_x = getRandomInt(FALSE, TRUE) ? -1 : 1;
-    tmpWorm->body->vel_y = getRandomInt(FALSE, TRUE) ? -1 : 1;
+    // No start velocity
+    tmpWorm->body->vel_x = 0;
+    tmpWorm->body->vel_y = 0;
 
     tmpWorm->body->next = NULL;
 
