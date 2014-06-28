@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define DELAY 40000
-#define NUM_WORMS 20
+#define NUM_WORMS 1
 #define NUM_APPLES 60
 
 #define TRUE 1
@@ -70,6 +70,8 @@ void logic(Worm headWorm, Apple headApple);
 void update(Worm headWorm, Apple headApple);
 // Render
 void render(Worm headWorm, Apple headApple);
+// Handle keyboard input
+void input(Worm headWorm);
 
 Control newControl() {
     Control tmpControl;
@@ -199,13 +201,13 @@ void drawWorm(Worm currentWorm) {
     while (currentBodypart != NULL) {
         // Head
         if (bodyCount == 0) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "P");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
         // Tail
         } else if (currentBodypart->next == NULL) {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "Z");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "o");
         // Body
         } else {
-            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "L");
+            mvprintw(currentBodypart->pos_y, currentBodypart->pos_x, "O");
         }
         bodyCount++;
         currentBodypart = currentBodypart->next;
@@ -241,9 +243,8 @@ int checkCollision(Worm worm, Apple apple) {
 }
 
 int main(int argc, const char *argv[]) {
-    char *appleString = "LSE";
+    char *appleString = "@";
 
-    int running = TRUE;
     int i;
     char c;
 
@@ -273,7 +274,7 @@ int main(int argc, const char *argv[]) {
     }
 
     // Mail Loop
-    while (running == TRUE) {
+    while (control->running == TRUE) {
         // We need to set the terminal dimensions to screen_height and screen_width for each
         // iteration of this loop to make resizing possible
         getmaxyx(stdscr, control->screen_height, control->screen_width);
@@ -281,16 +282,42 @@ int main(int argc, const char *argv[]) {
         logic(headWorm, headApple);
         update(headWorm, headApple);
         render(headWorm, headApple);
-
-        // Quit if q is pressed
-        timeout(1);
-        if ((c = getch()) == 'q')
-            running = FALSE;
+        input(headWorm);
     }
 
     endwin();
 
     return EXIT_SUCCESS;
+}
+
+void input(Worm headWorm) {
+    char c;
+    timeout(1);
+    switch(c = getch()) {
+        case 'q':
+            control->running = FALSE;
+            break;
+        case 'w':
+            // up
+            headWorm->body->vel_y = -1;
+            headWorm->body->vel_x = 0;
+            break;
+        case 'a':
+            // left
+            headWorm->body->vel_x = -1;
+            headWorm->body->vel_y = 0;
+            break;
+        case 's':
+            // down
+            headWorm->body->vel_y = 1;
+            headWorm->body->vel_x = 0;
+            break;
+        case 'd':
+            // right
+            headWorm->body->vel_x = 1;
+            headWorm->body->vel_y = 0;
+            break;
+    }
 }
 
 void logic(Worm headWorm, Apple headApple) {
@@ -343,7 +370,7 @@ void render(Worm headWorm, Apple headApple) {
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
     // Set Apple color
-    attron(COLOR_PAIR(1)); 
+    attron(COLOR_PAIR(1));
     // Render all apples
     while (currentApple != NULL) {
         drawApple(currentApple);
