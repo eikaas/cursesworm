@@ -121,16 +121,20 @@ void growWorm(Worm currentWorm) {
     // Need to decrement or increment depending on the velocity of the
     // previous body part for the next bodypart to end up in the right place.
 
+    if (prevBodypart->vel_x == 0) {
+        currentBodypart->pos_x = prevBodypart->pos_x;
     // If the previous bodypart is traveling to the right
-    if (prevBodypart->vel_x > 0) {
+    } else if (prevBodypart->vel_x > 0) {
         currentBodypart->pos_x = prevBodypart->pos_x - 1;
     // Else if the previous bodypart is traveling to the left
     } else {
         currentBodypart->pos_x = prevBodypart->pos_x + 1;
     }
 
+    if (prevBodypart->vel_y == 0) {
+        currentBodypart->pos_y = prevBodypart->pos_y;
     // If the previous bodypart is traveling down
-    if (prevBodypart->vel_y > 0) {
+    } else if (prevBodypart->vel_y > 0) {
         currentBodypart->pos_y = prevBodypart->pos_y - 1;
     // else if the previous bodypart is traveling up
     } else {
@@ -175,11 +179,11 @@ void updateWorm(Worm currentWorm) {
     Body currentBodypart = currentWorm->body;
     // Traverse the body of the worm.
     while (currentBodypart != NULL) {
-        // if x position is on either left or right side of the screen, flip vel_x
+        // if x position is on either left- or right-most side of the screen, flip vel_x
         if (currentBodypart->pos_x < 0 || currentBodypart->pos_x >= control->screen_width)
             currentBodypart->vel_x *= -1;
 
-        // if y position is on either top or bottom side of the screen, flip vel_y
+        // if y position is on either top- or bottom-most side of the screen, flip vel_y
         if (currentBodypart->pos_y < 0 || currentBodypart->pos_y >= control->screen_height)
             currentBodypart->vel_y *= -1;
 
@@ -279,10 +283,10 @@ int main(int argc, const char *argv[]) {
         // iteration of this loop to make resizing possible
         getmaxyx(stdscr, control->screen_height, control->screen_width);
 
+        input(headWorm);
         logic(headWorm, headApple);
         update(headWorm, headApple);
         render(headWorm, headApple);
-        input(headWorm);
     }
 
     endwin();
